@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { Button, Toast } from 'react-bootstrap';
+import { LoadSpinner } from './LoadSpinner';
+import { Rating } from 'react-simple-star-rating';
+import { reviewFormValidation } from '../validations/reviewform';
 import DatePicker from 'react-date-picker';
 import 'react-date-picker/dist/DatePicker.css';
-import { userSubmitReviewAPI } from '../api/user'
+import { userSubmitReviewAPI } from '../api/user';
 
 export const ReviewForm = () => {
 
@@ -37,18 +40,29 @@ export const ReviewForm = () => {
         'Perfect',
     ];
 
+    // Catch Rating value
+    const handleRating = (rate) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            userExperience: rate,
+        }))
+  
+      // other logic
+    }
     const [formData, setFormData] = useState({
         appUsage: '',
         selectedGoals: [],
-        userExperience: 5,
+        userExperience: null,
         improvements: '',
         birthday: null,
     })
-
+    const [spinner, setSpinner] = useState(false)
     const [showToast, setShowToast] = useState(false);
+    const [showErrorToast, setShowErrorToast] = useState(false);
 
 
     const handleChange = (e) => {
+        console.log(e,'its rate');
         const { name, value, type, checked } = e.target
         console.log(name, value, type, checked)
         setFormData((prevData) => {
@@ -65,6 +79,8 @@ export const ReviewForm = () => {
             return newData
         })
     }
+
+    const onPointerMove = (value, index) => console.log(value, index)
 
     const handleBirthdayChange = (date) => {
         setFormData((prevData) => ({
@@ -85,101 +101,157 @@ export const ReviewForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        showSubmitToast()
+        if(!reviewFormValidation(formData)) {
+            setShowErrorToast(true)
+            setTimeout(()=>{
+                setShowErrorToast(false)
+            },3000)
+            return
+        }
+        setSpinner(true)
         try {
             const res = await userSubmitReviewAPI(formData)
+            setSpinner(false)
+            showSubmitToast()
             console.log(res);
         } catch (error) {
             console.log(error);
         }
     }
 
+    if(spinner){
+        return(
+            <LoadSpinner/>
+        )
+    }
+
     return (
-        <Form onSubmit={handleSubmit}>
-            <Form.Group>
-                <Form.Label>How often do you use this app?</Form.Label>
-                <div>
-                    {usageOptions.map((value) => (
-                        <Form.Check
-                            key={value}
-                            type="radio"
-                            label={value}
-                            value={value}
-                            name='appUsage'
-                            checked={formData.appUsage === value}
-                            onChange={handleChange}
-                        />
-                    ))}
-                </div>
-                <Form.Label>Main app goal?</Form.Label>
-                <div>
-                    {goalOptions.map((goal) => (
-                        <Form.Check
-                            key={goal}
-                            type="checkbox"
-                            label={goal}
-                            value={goal}
-                            name='selectedGoals'
-                            checked={formData.selectedGoals.includes(goal)}
-                            onChange={handleChange}
-                        />
-                    ))}
-                </div>
-                <Form.Label>Rate user experience (1-10)</Form.Label>
-                <Form.Range
-                    min="1"
-                    max="10"
-                    step="1"
-                    value={formData.userExperience}
-                    name='userExperience'
-                    onChange={handleChange}
-                />
-                <div className="d-flex justify-content-between">
-                    {ratingLabels.map((label, index) => (
-                        <span key={index} className={formData.userExperience === index + 1 ? 'font-weight-bold' : ''}>
-                            {label}
-                        </span>
-                    ))}
-                </div>
-                <Form.Label>Suggest any improvements:</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    rows="4" // You can adjust the number of rows as needed
-                    value={formData.improvements}
-                    name='improvements'
-                    onChange={handleChange}
-                />
-                <Form.Label>Enter your birthday?</Form.Label>
-                <DatePicker
-                    selected={formData.birthday}
-                    onChange={handleBirthdayChange}
-                    value={formData.birthday}
-                    name='birthday'
-                    format='dd/MM/yyy' // You can adjust the date format as needed
-                    showYearDropdown
-                    scrollableYearDropdown
-                    maxDate={new Date()}
+        <>
+        <span style={{'color':'red'}}>* Required fields</span>
+        <Form onSubmit={handleSubmit} className="mt-4">
+        <Form.Group>
+            <Form.Label className="mb-2"><span style={{'color':'red'}}>*</span>1. &nbsp;How often do you use this app?</Form.Label>
+            <div>
+                {usageOptions.map((value) => (
+                    <Form.Check
+                        key={value}
+                        type="radio"
+                        label={value}
+                        value={value}
+                        name="appUsage"
+                        checked={formData.appUsage === value}
+                        onChange={handleChange}
+                    />
+                ))}
+            </div>
+            <hr />
+        </Form.Group>
+        <Form.Group className="mb-4">
+            <Form.Label className="mb-2"><span style={{'color':'red'}}>*</span>2. &nbsp;Main app goal?</Form.Label>
+            <div>
+                {goalOptions.map((goal) => (
+                    <Form.Check
+                        key={goal}
+                        type="checkbox"
+                        label={goal}
+                        value={goal}
+                        name="selectedGoals"
+                        checked={formData.selectedGoals.includes(goal)}
+                        onChange={handleChange}
+                    />
+                ))}
+            </div>
+            <hr />
+        </Form.Group>
+        <Form.Group className="mb-4">
+            <Form.Label className="mb-2"><span style={{'color':'red'}}>*</span>3. &nbsp;Rate user experience (1-10)</Form.Label>
+            <Rating
+            onClick={handleRating}
+            size={50}
+            iconsCount={10}
+            showTooltip
+            tooltipArray={ratingLabels}
+            onPointerMove={onPointerMove}
+            
+            />
+            {/* <Form.Range
+                min="1"
+                max="10"
+                step="1"
+                value={formData.userExperience}
+                name="userExperience"
+                onChange={handleChange}
+            />
+            <div className="d-flex justify-content-between">
+                {ratingLabels.map((label, index) => (
+                    <span key={index} className={formData.userExperience === index + 1 ? 'font-weight-bold' : ''}>
+                        {label}
+                    </span>
+                ))}
+            </div> */}
+            <hr />
+        </Form.Group>
+        <Form.Group className="mb-4">
+            <Form.Label className="mb-2"><span style={{'color':'red'}}>*</span>4. &nbsp;Suggest any improvements:</Form.Label>
+            <Form.Control
+                as="textarea"
+                rows="4"
+                value={formData.improvements}
+                name="improvements"
+                required
+                onChange={handleChange}
+            />
+            <hr />
+        </Form.Group>
+        <Form.Group className="mb-4">
+            <Form.Label className="mb-2"><span style={{'color':'red'}}>*</span>5. &nbsp;Enter your birthday:</Form.Label>
+            <DatePicker
+                selected={formData.birthday}
+                onChange={handleBirthdayChange}
+                value={formData.birthday}
+                name="birthday"
+                format="dd/MM/yyyy"
+                showYearDropdown
+                scrollableYearDropdown
+                maxDate={new Date()}
+            />
 
-                />
-                <Button variant="primary" type="submit">
-                    Submit Review
-                </Button>
+        </Form.Group>
+        <Button variant="primary" type="submit">
+            Submit Review
+        </Button>
 
-                <Toast
-                    show={showToast}
-                    onClose={() => setShowToast(false)}
-                    style={{
-                        position: 'fixed',
-                        top: '10px',
-                        right: '10px',
-                    }}
-                >
-                    <Toast.Header>
-                        <strong className="mr-auto">Review Submitted</strong>
-                    </Toast.Header>
-                    <Toast.Body>Your review has been submitted.</Toast.Body>
-                </Toast>
-            </Form.Group>
-        </Form>
+        <Toast
+            show={showToast}
+            onClose={() => setShowToast(false)}
+            style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                backgroundColor: 'green',
+            }}
+        >
+            <Toast.Header closeButton={true}>
+                <strong className="mr-auto">Review Submitted</strong>
+            </Toast.Header>
+            <Toast.Body>Your review has been submitted.</Toast.Body>
+        </Toast>
+        <Toast
+            show={showErrorToast} // Show the error toast when showErrorToast is true
+            onClose={() => setShowErrorToast(false)} // Close the error toast
+            style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                backgroundColor: 'red', // Set the background color for the error toast
+            }}
+        >
+            <Toast.Header closeButton={true}>
+                <strong className="mr-auto">Error</strong>
+            </Toast.Header>
+            <Toast.Body>Please fill out all required fields.</Toast.Body>
+        </Toast>
+    </Form>
+    </>
     )
 }

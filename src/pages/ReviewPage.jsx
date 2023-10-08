@@ -6,7 +6,9 @@ export const ReviewPage = () => {
   return (
     <div>
         <NavBar/>
+        <div className='App-body p-4'>
         <ReviewForm/>
+        </div>
     </div>
   )
 }

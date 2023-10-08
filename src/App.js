@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ReviewPage } from './pages/ReviewPage';
 import { HomePage } from './pages/HomePage';
+import { ResultPage } from './pages/ResultPage';
+import './App.css';
 
 
 function App() {
@@ -11,9 +13,8 @@ function App() {
         <Routes>
 
           <Route path='/' element={<HomePage />} />
-
-          <Route path='/add_review' element={<ReviewPage />} />
-
+          <Route path='/review' element={<ReviewPage />} />
+          <Route path='/result' element={<ResultPage />} />
         
         </Routes>
       </Router>
