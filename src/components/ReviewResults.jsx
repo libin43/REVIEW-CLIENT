@@ -1,16 +1,20 @@
 import React from 'react'
 import { Container, Card, ListGroup } from 'react-bootstrap'
+import { Accordion } from 'react-bootstrap';
 
 export const ReviewResults = ({props}) => {
     console.log(props,'incom');
   return (
+    <div className='App-body'>
     <Container>
-    <h2 className="mt-5 mb-3">Review Results</h2>
+    <h2 className="pt-5 mb-3">Review Results</h2>
+
     {props.map((review, index) => (
-      <Card key={index} className="mb-4">
-        <Card.Body>
-          <Card.Title>Review #{index + 1}</Card.Title>
-          <ListGroup variant="flush">
+          <Accordion defaultActiveKey="0" className='mt-3'>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>Review #{index + 1}</Accordion.Header>
+            <Accordion.Body>
+            <ListGroup variant="flush">
             <ListGroup.Item>
               <strong>App Usage:</strong> {review.appUsage}
             </ListGroup.Item>
@@ -28,9 +32,11 @@ export const ReviewResults = ({props}) => {
               <strong>Birthday:</strong> {review.birthday}
             </ListGroup.Item>
           </ListGroup>
-        </Card.Body>
-      </Card>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
     ))}
   </Container>
+  </div>
   )
 }

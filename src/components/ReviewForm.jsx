@@ -113,7 +113,13 @@ export const ReviewForm = () => {
             const res = await userSubmitReviewAPI(formData)
             setSpinner(false)
             showSubmitToast()
-            console.log(res);
+            setFormData({
+                appUsage: '',
+                selectedGoals: [],
+                userExperience: null,
+                improvements: '',
+                birthday: null,
+            });
         } catch (error) {
             console.log(error);
         }
@@ -174,21 +180,6 @@ export const ReviewForm = () => {
             onPointerMove={onPointerMove}
             
             />
-            {/* <Form.Range
-                min="1"
-                max="10"
-                step="1"
-                value={formData.userExperience}
-                name="userExperience"
-                onChange={handleChange}
-            />
-            <div className="d-flex justify-content-between">
-                {ratingLabels.map((label, index) => (
-                    <span key={index} className={formData.userExperience === index + 1 ? 'font-weight-bold' : ''}>
-                        {label}
-                    </span>
-                ))}
-            </div> */}
             <hr />
         </Form.Group>
         <Form.Group className="mb-4">
@@ -217,7 +208,7 @@ export const ReviewForm = () => {
             />
 
         </Form.Group>
-        <Button variant="primary" type="submit">
+        <Button className='mb-4 mx-4' variant="primary" type="submit">
             Submit Review
         </Button>
 
